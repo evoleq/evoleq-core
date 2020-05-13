@@ -22,7 +22,7 @@ import org.drx.evoleq.evolution.get
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Stop
 import org.drx.evoleq.evolution.stubs.InputStub
 import org.drx.evoleq.evolving.parallel
-import org.drx.evoleq.type.by
+import org.evoleq.math.cat.suspend.morhism.by
 import org.junit.Test
 
 class InputStubDslTest {

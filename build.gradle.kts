@@ -27,12 +27,16 @@ kotlin {
             implementation(kotlin("stdlib-jdk8"))
             //implementation(kotlin("reflect"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
+            implementation("org.evoleq:mathcat-core-jvm:1.0.0")
+            implementation("org.evoleq:mathcat-morphism-jvm:1.0.0")
         }
     }
     // JVM-specific tests and their dependencies:
     jvm().compilations["test"].defaultSourceSet {
         dependencies {
             implementation(kotlin("test-junit"))
+            implementation("org.evoleq:mathcat-core-jvm:1.0.0")
+            implementation("org.evoleq:mathcat-morphism-jvm:1.0.0")
         }
     }
 
@@ -41,6 +45,8 @@ kotlin {
             //implementation(kotlin("js"))
             //implementation(kotlin("reflect"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.3.5")
+            implementation("org.evoleq:mathcat-core-js:1.0.0")
+            implementation("org.evoleq:mathcat-morphism-js:1.0.0")
         }
         /* ... */
     }
@@ -52,6 +58,9 @@ kotlin {
                 implementation(kotlin("stdlib-common"))
                 implementation( project(":dynamics") )
                 implementation( project(":configurations") )
+
+                implementation("org.evoleq:mathcat-core-metadata:1.0.0")
+                implementation("org.evoleq:mathcat-morphism-metadata:1.0.0")
 
                 //implementation(kotlin("reflect"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.5")

@@ -16,8 +16,9 @@
 package org.drx.evoleq.evolving
 
 import kotlinx.coroutines.CoroutineScope
-import org.drx.evoleq.type.ScopedSuspended
+import org.evoleq.math.cat.suspend.morhism.ScopedSuspended
 import kotlin.reflect.KProperty
+
 
 interface KlEvolving<S,Data> : ScopedSuspended<S, Evolving<Data>> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) -> Evolving<Data> = morphism

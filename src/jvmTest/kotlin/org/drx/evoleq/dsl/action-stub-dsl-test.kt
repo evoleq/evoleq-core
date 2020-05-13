@@ -21,8 +21,8 @@ import org.drx.dynamics.Dynamic
 import org.drx.evoleq.evolution.stubs.ActionStub
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.parallel
-import org.drx.evoleq.type.by
-import org.drx.evoleq.type.evolve
+import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morhism.evolve
 import org.junit.Test
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 

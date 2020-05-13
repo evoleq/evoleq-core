@@ -16,7 +16,7 @@
 package org.drx.evoleq.evolution
 
 import org.drx.evoleq.evolving.*
-import org.drx.evoleq.type.by
+import org.evoleq.math.cat.suspend.morhism.by
 
 interface Gap<W, P> {
     val from: KlEvolving<W, Pair<W, P>>
