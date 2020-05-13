@@ -23,8 +23,8 @@ import org.drx.evoleq.evolving.evolving
 
 infix fun <S1, S2, T1, T2> KlEvolving<S1,T1>.pair(other: KlEvolving<S2,T2>): KlEvolving<Pair<S1,S2>,Pair<T1,T2>> = KlEvolving scope@{ pair ->
     with( Pair(
-            this@pair.function(this, pair.first),
-            other.function(this, pair.second))
+            this@pair.morphism(this, pair.first),
+            other.morphism(this, pair.second))
     ) {
         object : EvolvingPair<T1, T2> {
             override val scope: CoroutineScope = this@scope

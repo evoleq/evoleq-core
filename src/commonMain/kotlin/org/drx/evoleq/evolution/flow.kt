@@ -24,12 +24,12 @@ open class Flow<D, T>(
     internal val conditions: EvolutionConditions<D, T>,
     private val phi: KlEvolving<D, D>
 ) : Evolver<D> {
-    override val function: suspend CoroutineScope.(D) -> Evolving<D> = { data: D ->
+    override val morphism: suspend CoroutineScope.(D) -> Evolving<D> = { data: D ->
         org.drx.evoleq.evolve(
             data,
             conditions,
             this,
-            phi.function
+            phi.morphism
         )
     }
 }

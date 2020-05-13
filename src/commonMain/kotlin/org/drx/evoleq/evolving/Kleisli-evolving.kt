@@ -20,22 +20,22 @@ import org.drx.evoleq.type.ScopedSuspended
 import kotlin.reflect.KProperty
 
 interface KlEvolving<S,Data> : ScopedSuspended<S, Evolving<Data>> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) -> Evolving<Data> = function
+    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) -> Evolving<Data> = morphism
 
     suspend infix fun <T> map(f: suspend CoroutineScope.(Data)->T) = KlEvolving<S, T> {
-        s -> function(s) map f
+        s -> morphism(s) map f
     }
 }
 
 @Suppress("FunctionName")
 fun <S, Data> KlEvolving(arrow: suspend CoroutineScope.(S)->Evolving<Data>): KlEvolving<S, Data> = object : KlEvolving<S, Data> {
-    override val function: suspend CoroutineScope.(S) -> Evolving<Data> = arrow
+    override val morphism: suspend CoroutineScope.(S) -> Evolving<Data> = arrow
 
 
 }
 
 suspend operator fun <R, S, T> KlEvolving<R, S>.times(other: KlEvolving<S, T>): KlEvolving<R, T> = KlEvolving (
-    function * other.function
+    morphism * other.morphism
 )
 
 

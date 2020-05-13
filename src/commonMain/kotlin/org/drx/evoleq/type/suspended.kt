@@ -20,17 +20,17 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
 interface Suspended<in S, out T> : ReadOnlyProperty<Any?, suspend (S)->T> {
-    val function: suspend (S)->T
+    val morphism: suspend (S)->T
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend (S) -> T = function
+    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend (S) -> T = morphism
 
-    suspend fun<T1> times(other: Suspended<T,T1>): Suspended<S, T1> = Suspended {s -> other.function(function(s))}
+    suspend fun<T1> times(other: Suspended<T,T1>): Suspended<S, T1> = Suspended {s -> other.morphism(morphism(s))}
 }
 
 @Suppress("FunctionName")
 @EvoleqDsl
 fun <S, T> Suspended(function: suspend (S)->T): Suspended<S, T> = object : Suspended<S, T> {
-    override val function: suspend (S) -> T
+    override val morphism: suspend (S) -> T
         get() = function
 }
 

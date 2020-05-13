@@ -62,7 +62,7 @@ abstract class InputStub<I,Data> : Stub<Data> {
     open fun closePorts() {
         inputActor.close()
     }
-    override val function: suspend CoroutineScope.(Data) -> Evolving<Data> = {
+    override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
         data -> flow(Phase.Start(data)) map { it.data }
     }
 }

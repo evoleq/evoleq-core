@@ -20,37 +20,40 @@ import org.drx.evoleq.dsl.EvoleqDsl
 
 
 interface ScopedSuspendedState<S, T> : ScopedSuspended<S, Pair<T, S>> {
-    suspend fun <T1> map(f: suspend CoroutineScope.(T) -> T1): ScopedSuspendedState<S, T1> = ScopedSuspendedState {
-            s -> with(by(this@ScopedSuspendedState)(s)){
-        Pair(f(first),second)
-    }
+    suspend fun <T1> map(f: suspend CoroutineScope.(T) -> T1): ScopedSuspendedState<S, T1> = ScopedSuspendedState { s ->
+        with(by(this@ScopedSuspendedState)(s)) {
+            Pair(f(first), second)
+        }
     }
 }
+
 @Suppress("FunctionName")
 @EvoleqDsl
-fun <S, T> ScopedSuspendedState(state: suspend CoroutineScope.(S)->Pair<T, S>): ScopedSuspendedState< S, T> = object : ScopedSuspendedState<S, T> {
-    override val function: suspend CoroutineScope.(S) -> Pair<T, S>
-        get() = state
+fun <S, T> ScopedSuspendedState(state: suspend CoroutineScope.(S) -> Pair<T, S>): ScopedSuspendedState<S, T> =
+    object : ScopedSuspendedState<S, T> {
+        override val morphism: suspend CoroutineScope.(S) -> Pair<T, S>
+            get() = state
 
-}
+    }
 
 
-
-fun <S, T> ScopedSuspendedState<S, ScopedSuspendedState<S, T>>.multiply() : ScopedSuspendedState<S, T> = ScopedSuspendedState {
-        s -> with(by(this@multiply)(s)){
-    by(first)(second)
-}
-}
+fun <S, T> ScopedSuspendedState<S, ScopedSuspendedState<S, T>>.multiply(): ScopedSuspendedState<S, T> =
+    ScopedSuspendedState { s ->
+        with(by(this@multiply)(s)) {
+            by(first)(second)
+        }
+    }
 
 interface KlScopedSuspendedState<B, S, T> : ScopedSuspended<S, ScopedSuspendedState<B, T>>
 
 @Suppress("FunctionName")
-fun<B, S, T>  KlScopedSuspendedState(arrow: suspend CoroutineScope.(S)->ScopedSuspendedState<B, T>): KlScopedSuspendedState<B, S, T> = object : KlScopedSuspendedState<B, S, T> {
-    override val function: suspend CoroutineScope.(S) -> ScopedSuspendedState<B, T>
-        get() = arrow
-}
+fun <B, S, T> KlScopedSuspendedState(arrow: suspend CoroutineScope.(S) -> ScopedSuspendedState<B, T>): KlScopedSuspendedState<B, S, T> =
+    object : KlScopedSuspendedState<B, S, T> {
+        override val morphism: suspend CoroutineScope.(S) -> ScopedSuspendedState<B, T>
+            get() = arrow
+    }
 
 suspend operator fun <B, R, S, T> KlScopedSuspendedState<B, R, S>.times(other: KlScopedSuspendedState<B, S, T>): KlScopedSuspendedState<B, R, T> =
-    KlScopedSuspendedState {
-            r -> by(this@times)(r).map(by(other)).multiply()
+    KlScopedSuspendedState { r ->
+        by(this@times)(r).map(by(other)).multiply()
     }

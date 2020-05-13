@@ -39,7 +39,7 @@ suspend fun <Data> Update<Data>.data(): ScopedSuspended<Data,Data> = ScopedSuspe
 @Suppress("FunctionName")
 fun<Data> Update(senderId: ID, update: suspend CoroutineScope.(Data) -> Data) = object :
     Update<Data> {
-    override val function: suspend CoroutineScope.(Data) -> Updated<Data> = {
+    override val morphism: suspend CoroutineScope.(Data) -> Updated<Data> = {
         data ->
         Updated(senderId, update(data))
     }
@@ -60,7 +60,7 @@ abstract class UpdateStub<Data>(private val updateParent: suspend (Update<Data>)
         SimpleProcessFlow(
             onStart,
             {data -> updateStack.onNext { update ->
-                with(update.function) {
+                with(update.morphism) {
                     try {
                         if (this(data).data != data) {
                             Phase.Wait(onUpdate(this(data)))
@@ -76,7 +76,7 @@ abstract class UpdateStub<Data>(private val updateParent: suspend (Update<Data>)
         )
     )}
 
-    override val function: suspend CoroutineScope.(Data) -> Evolving<Data> = {
+    override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
             data -> flow(Phase.Start(data)) map { it.data }
     }
 
