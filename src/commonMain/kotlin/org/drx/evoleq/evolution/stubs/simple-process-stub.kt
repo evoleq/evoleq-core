@@ -37,7 +37,7 @@ open class SimpleProcessStub<Data>(
     override val stubs: HashMap<ID, Stub<*>>
         get() = HashMap()
 
-    override val function: suspend CoroutineScope.(SimpleProcessPhase<Data>) -> Evolving<SimpleProcessPhase<Data>>
+    override val morphism: suspend CoroutineScope.(SimpleProcessPhase<Data>) -> Evolving<SimpleProcessPhase<Data>>
         get() = {
             phase -> when(phase) {
                 is SimpleProcessPhase.Start -> parallel {

@@ -50,7 +50,7 @@ class UpdateStubDslTest {
         }
 
         parallel{
-            val result = updateStub.function(this,0).get()
+            val result = updateStub.morphism(this,0).get()
             assert(result == 1)
             dynResult.value = result
         }

@@ -34,7 +34,7 @@ class KleisliTest {
         fun klEv(name: String) = KlParallel{ x: Int -> parallel{delay(500);println(name);x} } as KlEvolving<Int,Int>
         // We have
         val p = klEv("p")
-        with((p*p).function(DefaultEvolvingScope(),0)){
+        with((p*p).morphism(DefaultEvolvingScope(),0)){
             // first let's see that p+p(0) has the right type
             assert(this is Parallel<Int>)
             // second, let's see that computation has already been done
@@ -46,7 +46,7 @@ class KleisliTest {
 
         // But, on the other hand,  also
         val q = klEv("q")
-        assert(measureTimeMillis{(q*q).function(DefaultEvolvingScope(),0).get()} >= 1_000)
+        assert(measureTimeMillis{(q*q).morphism(DefaultEvolvingScope(),0).get()} >= 1_000)
         // which shows that p*p(0) is initialized immediately., like expected.
         // Moreover, we have
         with(DefaultEvolvingScope()) {

@@ -22,5 +22,5 @@ interface KlEvolvingPair<S, F1, F2> : KlEvolving<S, Pair<F1,F2>>
 
 @Suppress("FunctionName")
 fun <S, F1, F2>KlEvolvingPair(arrow: suspend CoroutineScope.(S)->Evolving<Pair<F1,F2>>): KlEvolvingPair<S, F1, F2> = object : KlEvolvingPair<S, F1, F2> {
-    override val function: suspend CoroutineScope.(S) -> Evolving<Pair<F1,F2>> = arrow
+    override val morphism: suspend CoroutineScope.(S) -> Evolving<Pair<F1,F2>> = arrow
 }

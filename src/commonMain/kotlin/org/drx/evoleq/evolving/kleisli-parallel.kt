@@ -19,15 +19,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlin.reflect.KProperty
 
 interface KlParallel<S, Data> : KlEvolving<S, Data> {
-    override val function: suspend CoroutineScope.(S) -> Parallel<Data>
-    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) ->Parallel<Data> = function
+    override val morphism: suspend CoroutineScope.(S) -> Parallel<Data>
+    override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) ->Parallel<Data> = morphism
 }
 
 @Suppress("FunctionName")
 fun <S, Data> KlParallel(arrow: suspend CoroutineScope.(S)->Parallel<Data>): KlParallel<S, Data> = object : KlParallel<S, Data> {
-    override val function: suspend CoroutineScope.(S) -> Parallel<Data> = arrow
+    override val morphism: suspend CoroutineScope.(S) -> Parallel<Data> = arrow
 }
 
 suspend operator fun <R, S, T> KlParallel<R, S>.times(other: KlParallel<S, T>): KlParallel<R, T> = KlParallel (
-    function * other.function
+    morphism * other.morphism
 )

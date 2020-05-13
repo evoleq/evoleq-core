@@ -80,7 +80,7 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
         )
     )}
 
-    override val function: suspend CoroutineScope.(Data) -> Evolving<Data> = {
+    override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
             data -> flow(Phase.Start(data)) map { it.data }
     }
 

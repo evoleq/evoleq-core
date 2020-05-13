@@ -49,7 +49,7 @@ open class StubConfiguration<Data> : Configuration<Stub<out Data>> {
         override val stubs: HashMap<ID, Stub<*>>
             get() = this@StubConfiguration.stubs
 
-        override val function: suspend CoroutineScope.(Data) -> Evolving<Data>
+        override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data>
             get() = {data: Data ->  this@StubConfiguration.evolve(this,data)}
 
         //override suspend fun CoroutineScope.evolve(data: Data): Evolving<Data> = coroutineScope {  function(data) }
@@ -131,7 +131,7 @@ fun <Data> stub(configuration: StubConfiguration<Data>.()->Unit): Stub<Data> = w
 fun <Data> Stub<Data>.configuration(): Pair<out StubConfiguration<*>,StubConfiguration<Data>.()->Unit> =
     Pair<StubConfiguration<*>,StubConfiguration<Data>.()->Unit>(StubConfiguration<Data>()) {
         id(this@configuration.id)
-        evolve(this@configuration.function)
+        evolve(this@configuration.morphism)
         stubs.putAll( this@configuration.stubs )
         when(this@configuration.parent) {
             null -> Unit
