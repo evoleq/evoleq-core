@@ -31,20 +31,21 @@ class EvolutionConditionsConfiguration<D, T> :
             check = check!!,
             updateCondition = updateCondition!!
         )
-
+    @EvoleqDsl
     fun EvolutionConditionsConfiguration<D, T>.testObject(testObject: T) {
         this.testObject = testObject
     }
-
+    @EvoleqDsl
     fun EvolutionConditionsConfiguration<D, T>.check(check: (T)->Boolean) {
         this.check = check
     }
-
+    @EvoleqDsl
     fun EvolutionConditionsConfiguration<D, T>.updateCondition(update: (D)->T) {
         updateCondition = update
     }
 
 }
+@EvoleqDsl
 fun <D,T> conditions(configurration: EvolutionConditionsConfiguration<D, T>.()->Unit) : EvolutionConditions<D, T> = with(EvolutionConditionsConfiguration<D, T>()) {
     configurration()
     configure()

@@ -16,6 +16,7 @@
 package org.drx.evoleq.evolving
 
 import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.EvoleqDsl
 import kotlin.reflect.KProperty
 
 interface KlParallel<S, Data> : KlEvolving<S, Data> {
@@ -23,6 +24,7 @@ interface KlParallel<S, Data> : KlEvolving<S, Data> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): suspend CoroutineScope.(S) ->Parallel<Data> = morphism
 }
 
+@EvoleqDsl
 @Suppress("FunctionName")
 fun <S, Data> KlParallel(arrow: suspend CoroutineScope.(S)->Parallel<Data>): KlParallel<S, Data> = object : KlParallel<S, Data> {
     override val morphism: suspend CoroutineScope.(S) -> Parallel<Data> = arrow

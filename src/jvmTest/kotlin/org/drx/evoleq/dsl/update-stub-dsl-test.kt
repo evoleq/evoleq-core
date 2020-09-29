@@ -21,8 +21,8 @@ import org.drx.dynamics.Dynamic
 import org.drx.evoleq.evolution.stubs.UpdateStub
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.evolving.parallel
-import org.evoleq.math.cat.suspend.morhism.by
-import org.evoleq.math.cat.suspend.morhism.evolve
+import org.evoleq.math.cat.suspend.morphism.by
+import org.evoleq.math.cat.suspend.morphism.evolve
 import org.junit.Test
 
 class UpdateStubDslTest {

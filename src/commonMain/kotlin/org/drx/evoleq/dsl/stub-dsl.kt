@@ -25,7 +25,7 @@ import org.drx.evoleq.evolution.Stub
 import org.drx.evoleq.evolving.DefaultEvolvingScope
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.parallel
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.by
 
 
 open class StubConfiguration<Data> : Configuration<Stub<out Data>> {

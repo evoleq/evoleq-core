@@ -26,7 +26,7 @@ import org.drx.evoleq.evolution.stubs.UpdateStub
 import org.drx.evoleq.evolution.stubs.Updated
 import org.drx.evoleq.evolution.stubs.data
 import org.drx.evoleq.evolving.Evolving
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.by
 
 open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 

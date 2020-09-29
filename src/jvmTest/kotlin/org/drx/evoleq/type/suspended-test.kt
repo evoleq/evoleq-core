@@ -16,8 +16,8 @@
 package org.drx.evoleq.type
 
 import kotlinx.coroutines.runBlocking
-import org.evoleq.math.cat.suspend.morhism.ScopedSuspended
-import org.evoleq.math.cat.suspend.morhism.Suspended
+import org.evoleq.math.cat.suspend.morphism.ScopedSuspended
+import org.evoleq.math.cat.suspend.morphism.Suspended
 import org.junit.Test
 
 class SuspendedTest {

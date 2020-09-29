@@ -16,7 +16,8 @@
 package org.drx.evoleq.evolving
 
 import kotlinx.coroutines.CoroutineScope
-import org.evoleq.math.cat.suspend.morhism.ScopedSuspended
+import org.drx.evoleq.dsl.EvoleqDsl
+import org.evoleq.math.cat.suspend.morphism.ScopedSuspended
 import kotlin.reflect.KProperty
 
 
@@ -28,6 +29,7 @@ interface KlEvolving<S,Data> : ScopedSuspended<S, Evolving<Data>> {
     }
 }
 
+@EvoleqDsl
 @Suppress("FunctionName")
 fun <S, Data> KlEvolving(arrow: suspend CoroutineScope.(S)->Evolving<Data>): KlEvolving<S, Data> = object : KlEvolving<S, Data> {
     override val morphism: suspend CoroutineScope.(S) -> Evolving<Data> = arrow

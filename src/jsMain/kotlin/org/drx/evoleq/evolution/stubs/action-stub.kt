@@ -23,7 +23,8 @@ import org.drx.dynamics.not
 import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.flows.process.SimpleProcessFlow
 import org.drx.evoleq.evolving.Evolving
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.ScopedSuspended
+import org.evoleq.math.cat.suspend.morphism.by
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 
@@ -31,7 +32,7 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
 
     private class StopException: Exception()
 
-    private val updateStack by DynamicArrayList<Update<Data>>(arrayListOf())
+    //private val updateStack by DynamicArrayList<Update<Data>>(arrayListOf())
     /*
     private val updateActor = CoroutineScope(Job()).broadcast<Update<Data>>(capacity = 10_000) {
         for(update in channel) {
@@ -55,7 +56,7 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
     private val inputStackIsEmpty = inputStack.isEmpty
     private val stacksAreNonEmpty = !(updateStackIsEmpty and inputStackIsEmpty)
 
-    private val flow by lazy{ by(
+    override val flow by lazy{ by(
         SimpleProcessFlow(
             onStart,
             {data ->

@@ -18,11 +18,14 @@ package org.drx.evoleq.evolving
 import kotlinx.coroutines.*
 import org.drx.dynamics.Dynamic
 import org.drx.dynamics.exec.blockUntil
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.type.Maybe
 import kotlin.reflect.KProperty
 
 open class OnDemand<out Data>(override val scope: CoroutineScope = DefaultEvolvingScope(), val block: suspend CoroutineScope.()->Data) : Evolving<Data> {
     private val maybe by Dynamic<Maybe<Data>>(Maybe.Nothing())
+
+    @EvoleqDsl
     override suspend fun get(): Data {
         if(maybe.value is Maybe.Nothing<*>) {
             scope.launch {
@@ -36,6 +39,8 @@ open class OnDemand<out Data>(override val scope: CoroutineScope = DefaultEvolvi
         }
         return (maybe.value as Maybe.Just).value
     }
+
+    @EvoleqDsl
     override suspend infix fun <T> map(f: suspend CoroutineScope.(Data)->T): OnDemand<T> = with(CoroutineScope(SupervisorJob())) scope@{
         this+scope.coroutineContext
         onDemand {
@@ -48,4 +53,5 @@ open class OnDemand<out Data>(override val scope: CoroutineScope = DefaultEvolvi
     //internal fun <T> onset(id: ID = OnSet::class, f: (Data)->T) = maybe.push(id){it map f}
 }
 
+@EvoleqDsl
 fun <Data> CoroutineScope.onDemand(block: suspend CoroutineScope.() -> Data): OnDemand<Data> = OnDemand(this, block)

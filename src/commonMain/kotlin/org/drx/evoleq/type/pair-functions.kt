@@ -16,11 +16,13 @@
 package org.drx.evoleq.type
 
 import kotlinx.coroutines.CoroutineScope
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.EvolvingPair
 import org.drx.evoleq.evolving.KlEvolving
 import org.drx.evoleq.evolving.evolving
 
+@EvoleqDsl
 infix fun <S1, S2, T1, T2> KlEvolving<S1,T1>.pair(other: KlEvolving<S2,T2>): KlEvolving<Pair<S1,S2>,Pair<T1,T2>> = KlEvolving scope@{ pair ->
     with( Pair(
             this@pair.morphism(this, pair.first),

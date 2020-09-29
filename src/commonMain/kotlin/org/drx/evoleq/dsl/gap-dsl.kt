@@ -30,15 +30,17 @@ open class GapConfiguration<W, P> : Configuration<Gap<W, P>> {
         override val to: KlEvolving<Pair<W, P>, W>
             get() = this@GapConfiguration.to
     }
-
+    @EvoleqDsl
     fun GapConfiguration<W, P>.from(arrow: KlEvolving<W, Pair<W, P>>) {
         from = arrow
     }
+    @EvoleqDsl
     fun GapConfiguration<W, P>.to(arrow: KlEvolving<Pair<W, P>, W>) {
         to = arrow
     }
 }
 
+@EvoleqDsl
 fun <W, P > gap(configuration: GapConfiguration<W, P>.()->Unit): Gap<W, P> = with(GapConfiguration<W, P>()){
     configuration()
     configure()

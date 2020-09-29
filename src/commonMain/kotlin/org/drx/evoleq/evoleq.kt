@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import org.drx.evoleq.conditions.EvolutionConditions
 import org.drx.evoleq.conditions.ok
 import org.drx.evoleq.conditions.update
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.evolving
 

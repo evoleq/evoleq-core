@@ -16,6 +16,8 @@
 
 package org.drx.evoleq.conditions
 
+import org.drx.evoleq.dsl.EvoleqDsl
+
 
 /**
  * Evolution conditions for the evolution equation
@@ -29,10 +31,12 @@ data class EvolutionConditions<in D, T>(
 /**
  * Update the evolution condition
  */
+@EvoleqDsl
 fun<D,T> EvolutionConditions<D, T>.update(data: D): EvolutionConditions<D, T> =
     copy( testObject = updateCondition( data ) )
 
 /**
  * Check test-object
  */
+@EvoleqDsl
 fun<D,T> EvolutionConditions<D, T>.ok(): Boolean = check( testObject )

@@ -26,7 +26,7 @@ import org.drx.evoleq.evolution.stubs.UpdateStub
 import org.drx.evoleq.evolution.stubs.Updated
 import org.drx.evoleq.evolution.stubs.data
 import org.drx.evoleq.evolving.Evolving
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.by
 
 open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
@@ -40,9 +40,9 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
     var onStop: suspend CoroutineScope.(Data)->Data = { data -> data }
 
-    private val stub by Dynamic<UpdateStub<Data>?>(null)
+    internal val stub by Dynamic<UpdateStub<Data>?>(null)
 
-    private val stubIsNotNull by stub.isNotNull()
+    internal val stubIsNotNull by stub.isNotNull()
 
     class ParentIsNotNull
     private val parentIsNotNull by stub.push(ParentIsNotNull::class){ it?.parent != null }

@@ -35,6 +35,7 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
         } }
     }
 
+    @EvoleqDsl
     override suspend fun get(): Data {
         blockUntil(maybe){ value -> value is Maybe.Just }
         return (maybe.value as Maybe.Just).value
@@ -42,6 +43,7 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Parallel<Data> = this
 
+    @EvoleqDsl
     @Suppress("unchecked_cast")
     override suspend infix fun < T> map(f: suspend CoroutineScope.(Data)->T): Parallel<T>  = with(CoroutineScope(SupervisorJob())) scope@{
         this+scope.coroutineContext
@@ -63,8 +65,10 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
 @EvoleqDsl
 fun <Data> CoroutineScope.parallel(block: suspend CoroutineScope.() -> Data): Parallel<Data> = Parallel(this, block)
 
+@EvoleqDsl
 fun <Data> CoroutineScope.parallel(data: Data): Parallel<Data> = parallel{data}
 
+@EvoleqDsl
 @Suppress("unchecked_cast")
 fun <Data> Parallel<Parallel<Data>>.multiply(): Parallel<Data> = (onset { p -> p }.value as Maybe.Just<*>).value as Parallel<Data>
 

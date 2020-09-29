@@ -32,6 +32,7 @@ interface Evolving<out Data> : ReadOnlyProperty<Any?,Evolving<Data>> {
     suspend infix fun <T> map(f: suspend CoroutineScope.(Data)->T): Evolving<T> = coroutineScope { evolving(f(get())) }
 }
 
+@EvoleqDsl
 fun <Data> Evolving<Data>.job() = scope.coroutineContext[Job]
 
 @EvoleqDsl
@@ -53,6 +54,7 @@ fun <Data> CoroutineScope.evolving(block: suspend CoroutineScope.() -> Data): Ev
         override suspend fun get(): Data = coroutineScope { block() }
     }
 
+@EvoleqDsl
 suspend fun <Data> Evolving<Evolving<Data>>.multiply(): Evolving<Data> = get()
 
 suspend operator fun <R, S, T> (suspend CoroutineScope.(R)->Evolving<S>).times(other: suspend CoroutineScope.(S)->Evolving<T>): suspend CoroutineScope.(R)->Evolving<T> = {

@@ -15,17 +15,20 @@
  */
 package org.drx.evoleq.evolution
 
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolving.*
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.by
 
 interface Gap<W, P> {
     val from: KlEvolving<W, Pair<W, P>>
     val to: KlEvolving<Pair<W, P>, W>
 }
 
+@EvoleqDsl
 suspend fun <W, P> Gap<W, P>.fill(filler: KlEvolvingPair<Pair<W, P>, W, P>): KlEvolving<W, W> =
     from * filler * to
 
+@EvoleqDsl
 suspend fun <W, P> Gap<W, P>.fill(filler: KlEvolving<P, P>): KlEvolving<W, W> =
     with(KlEvolvingPair { pair: Pair<W, P> ->
         EvolvingPair(

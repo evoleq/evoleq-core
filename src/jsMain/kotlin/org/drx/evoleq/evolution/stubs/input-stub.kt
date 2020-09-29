@@ -22,7 +22,7 @@ import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.Stub
 import org.drx.evoleq.evolution.flows.process.SimpleProcessFlow
 import org.drx.evoleq.evolving.Evolving
-import org.evoleq.math.cat.suspend.morhism.by
+import org.evoleq.math.cat.suspend.morphism.by
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 

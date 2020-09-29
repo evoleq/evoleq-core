@@ -16,6 +16,7 @@
 package org.drx.evoleq.evolution
 
 import org.drx.dynamics.ID
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.dsl.StubConfiguration
 import org.drx.evoleq.dsl.configuration
 
@@ -25,8 +26,10 @@ interface Stub<Data> : Evolver<Data> {
     val stubs: HashMap<ID, Stub<*>>
 }
 
+@EvoleqDsl
 operator fun <D> Stub<D>.get(childId: ID): Stub<*>? = stubs[childId]
 
+@EvoleqDsl
 operator fun <D>Stub<D>.set(childId: ID, child: Stub<*>) {
     stubs[id] = with(child.configuration() as Pair<out StubConfiguration<*>, StubConfiguration<*>.()->Unit>) {
         val conf = first
@@ -37,6 +40,7 @@ operator fun <D>Stub<D>.set(childId: ID, child: Stub<*>) {
     }
 }
 
+@EvoleqDsl
 @Suppress("unchecked_cast")
 fun <E> Stub<*>.find(id: ID): Stub<E>? = (stubs[id] as Stub<E>?)?:with(stubs.values) {
     forEach {

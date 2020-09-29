@@ -31,7 +31,7 @@ open class ActionStubConfiguration<I, Data> : UpdateStubConfiguration<Data>() {
 
     private lateinit var onInput: suspend CoroutineScope.(I, Data) -> Phase<Data>
 
-    private val stub by Dynamic<ActionStub<I, Data>?>(null)
+    //private val stub by Dynamic<ActionStub<I, Data>?>(null)
 
     //private val stubIsNotNull by stub.isNotNull()
 

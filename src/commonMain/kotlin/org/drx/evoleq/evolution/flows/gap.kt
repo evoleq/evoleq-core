@@ -16,17 +16,21 @@
 package org.drx.evoleq.evolution.flows
 
 import org.drx.evoleq.conditions.EvolutionConditions
+import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.Flow
 import org.drx.evoleq.evolution.Gap
 import org.drx.evoleq.evolution.fill
 
+@EvoleqDsl
 suspend fun <P, W, T> Flow<P, T>.close (gap: Gap<W, P>,conditions: EvolutionConditions<W,T>): Flow<W,T> = Flow(
     conditions,
     gap.fill(this)
 )
 
+@EvoleqDsl
 suspend infix fun <P, W, T> Flow<P, T>.close (gap: Gap<W, P>):suspend (EvolutionConditions<W,T>)->Flow<W,T> = {
     conditions -> this@close.close(gap,conditions)
 }
 
+@EvoleqDsl
 suspend infix fun <W, T> (suspend (EvolutionConditions<W,T>)->Flow<W,T>).under(conditions: EvolutionConditions<W, T>): Flow<W, T> = this(conditions)
