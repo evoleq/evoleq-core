@@ -74,3 +74,5 @@ kotlin {
         }
     }
 }
+
+apply(from = "../publish.mpp.gradle.kts")
