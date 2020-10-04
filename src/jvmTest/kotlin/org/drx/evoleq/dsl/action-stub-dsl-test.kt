@@ -59,4 +59,37 @@ class ActionStubDslTest {
         assert(updateCalled.value == resultValue)
     }
 
+    @Test fun `handle heavy load of inputs`() = runBlocking {
+        val stub = actionStub<String,Int>{
+            id(ActionStub::class)
+            onInput { input, data ->
+                when(input) {
+                    "update" -> Phase.Wait(data + 1)
+                    "stop" -> Phase.Stop(data)
+                    else -> Phase.Wait(data)
+                }
+            }
+        }
+        val result by Dynamic<Evolving<Int>?>(null)
+        parallel{
+            result.value = evolve(0) by stub
+        }
+        //delay(1500)
+
+        parallel{
+            (1..5000).forEach { stub.input("update") }
+            stub.input("stop")
+        }
+
+
+
+        while (result.value == null) {
+            delay(10)
+        }
+
+
+        println(result.value!!.get())
+
+    }
+
 }

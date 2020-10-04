@@ -18,6 +18,8 @@ package org.drx.evoleq.evolution.stubs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.drx.dynamics.DynamicArrayList
 import org.drx.dynamics.ID
 import org.drx.dynamics.onNext

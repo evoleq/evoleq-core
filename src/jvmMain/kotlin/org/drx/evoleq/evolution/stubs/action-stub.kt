@@ -56,20 +56,26 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
             onStart,
             {data ->
                 blockUntil(stacksAreNonEmpty){it}
-                if(!(updateStackIsEmpty.value)){
-                    with(by(updateStack.pop())){
-                        try {
-                            if(this(data).data != data){
-                                Phase.Wait(onUpdate(this(data)))
-                            } else {
-                                Phase.Wait(data)
+                try {
+                    if (!(updateStackIsEmpty.value)) {
+                        with(by(updateStack.pop())) {
+                            try {
+                                if (this(data).data != data) {
+                                    Phase.Wait(onUpdate(this(data)))
+                                } else {
+                                    Phase.Wait(data)
+                                }
+                            } catch (exception: StopException) {
+                                Phase.Stop(data)
                             }
-                        } catch(exception: StopException) {
-                            Phase.Stop(data)
                         }
+                    } else if(!inputStackIsEmpty.value){
+                        onInput(inputStack.pop(), data)
+                    } else {
+                        Phase.Wait(data)
                     }
-                } else {
-                    onInput(inputStack.pop(),data)
+                } catch(exception: NoSuchElementException) {
+                    Phase.Wait(data)
                 }
             },
             onStop

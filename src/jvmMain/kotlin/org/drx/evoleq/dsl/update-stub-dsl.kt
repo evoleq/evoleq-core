@@ -16,6 +16,8 @@
 package org.drx.evoleq.dsl
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.drx.dynamics.Dynamic
 import org.drx.dynamics.ID
 import org.drx.dynamics.exec.blockUntil
@@ -27,6 +29,7 @@ import org.drx.evoleq.evolution.stubs.Updated
 import org.drx.evoleq.evolution.stubs.data
 import org.drx.evoleq.evolving.Evolving
 import org.evoleq.math.cat.suspend.morphism.by
+import java.lang.Thread.sleep
 
 open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
@@ -42,10 +45,28 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
     private val stub by Dynamic<UpdateStub<Data>?>(null)
 
-    private val stubIsNotNull by stub.isNotNull()
+    private lateinit var stubIsNotNullInner: Dynamic<Boolean>
+    internal val stubIsNotNull by lazy {
+        GlobalScope.launch {
+            stubIsNotNullInner = stub.isNotNull()
+        }
+        while(!::stubIsNotNullInner.isInitialized) {
+            sleep(1)
+        }
+        stubIsNotNullInner
+    }
 
     class ParentIsNotNull
-    private val parentIsNotNull by stub.push(ParentIsNotNull::class){ it?.parent != null }
+    private lateinit var parentIsNotNullInner: Dynamic<Boolean>
+    private val parentIsNotNull by lazy{
+        GlobalScope.launch {
+            parentIsNotNullInner = stub.push(ParentIsNotNull::class){ it?.parent != null }
+        }
+        while(!::parentIsNotNullInner.isInitialized) {
+            sleep(1)
+        }
+        parentIsNotNullInner
+    }
 
     override fun configure(): UpdateStub<Data> = with(object : UpdateStub<Data>(updateParent){
         override val id: ID

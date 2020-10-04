@@ -59,7 +59,7 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
         }
     }
 
-    internal fun <T> onset(id: ID = OnSet::class, f:  (Data)->T) = maybe.push(id){it map f}
+    internal suspend fun <T> onset(id: ID = OnSet::class, f:  (Data)->T) = maybe.push(id){it map f}
 }
 
 @EvoleqDsl
@@ -70,7 +70,7 @@ fun <Data> CoroutineScope.parallel(data: Data): Parallel<Data> = parallel{data}
 
 @EvoleqDsl
 @Suppress("unchecked_cast")
-fun <Data> Parallel<Parallel<Data>>.multiply(): Parallel<Data> = (onset { p -> p }.value as Maybe.Just<*>).value as Parallel<Data>
+suspend fun <Data> Parallel<Parallel<Data>>.multiply(): Parallel<Data> = (onset { p -> p }.value as Maybe.Just<*>).value as Parallel<Data>
 
 suspend operator fun <R, S, T> (suspend CoroutineScope.(R)->Parallel<S>).times(other: suspend CoroutineScope.(S)->Parallel<T>): suspend CoroutineScope.(R)->Parallel<T> = {
         r -> (this@times(r) map other).multiply()
