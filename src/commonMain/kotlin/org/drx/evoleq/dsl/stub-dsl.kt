@@ -51,9 +51,7 @@ open class StubConfiguration<Data> : Configuration<Stub<out Data>> {
 
         override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data>
             get() = {data: Data ->  this@StubConfiguration.evolve(this,data)}
-
-        //override suspend fun CoroutineScope.evolve(data: Data): Evolving<Data> = coroutineScope {  function(data) }
-
+        
     }) stub@{
         configureChildren(this@stub)
         this@stub
@@ -125,7 +123,6 @@ fun <Data> stub(configuration: StubConfiguration<Data>.()->Unit): Stub<Data> = w
     configure()
 }
 
-//configure(configuration) as Stub<Data>
 
 @EvoleqDsl
 fun <Data> Stub<Data>.configuration(): Pair<out StubConfiguration<*>,StubConfiguration<Data>.()->Unit> =

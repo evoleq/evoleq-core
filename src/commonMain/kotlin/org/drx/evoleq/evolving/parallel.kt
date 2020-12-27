@@ -27,6 +27,7 @@ import kotlin.reflect.KProperty
 
 open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolvingScope(), open val  block: suspend CoroutineScope.()->Data) : Evolving<Data> {
     private val maybe by Dynamic<Maybe<Data>>(Maybe.Nothing())
+    //val singleton by Singleton<Data>()
     init {
         scope.launch { maybe.value  = withContext(Dispatchers.Default) {
             coroutineScope {
@@ -45,17 +46,24 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
 
     @EvoleqDsl
     @Suppress("unchecked_cast")
-    override suspend infix fun < T> map(f: suspend CoroutineScope.(Data)->T): Parallel<T>  = with(CoroutineScope(SupervisorJob())) scope@{
+    override suspend infix fun < T> map(
+        f: suspend CoroutineScope.(Data)->T
+    ): Parallel<T>  = with(CoroutineScope(SupervisorJob())) scope@{
         this+scope.coroutineContext
-        parallel {
+        parallel { f(get())
+            /*
             with(onset { s -> async{ this@scope.f(s) } }) maybe@{
                 blockUntil(this){ maybe -> maybe is Maybe.Just }
                 if(this@scope.coroutineContext[Job]!!.isCancelled){
                     throw Exception("computation has been cancelled")
                 } else {
-                    (this@maybe.value as Maybe.Just).value.await()
+                    val deferred = this@maybe.value
+                    require(deferred is Maybe.Just)
+                    deferred.value.await()
                 }
             }
+            
+             */
         }
     }
 

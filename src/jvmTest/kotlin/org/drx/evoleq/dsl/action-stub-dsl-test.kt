@@ -15,8 +15,7 @@
  */
 package org.drx.evoleq.dsl
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.drx.dynamics.Dynamic
 import org.drx.evoleq.evolution.stubs.ActionStub
 import org.drx.evoleq.evolving.Evolving
@@ -24,10 +23,12 @@ import org.drx.evoleq.evolving.parallel
 import org.evoleq.math.cat.suspend.morphism.by
 import org.evoleq.math.cat.suspend.morphism.evolve
 import org.junit.Test
+import kotlin.random.Random
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
-class ActionStubDslTest {
+class ActionStubDslTestJvm {
 
+    @ExperimentalCoroutinesApi
     @Test fun `should call onUpdate when selfUpdate is called` () = runBlocking {
         val startValue = 0
         val addValue = 2
@@ -54,41 +55,64 @@ class ActionStubDslTest {
         }
         stub.input("update")
         stub.input("stop")
-        delay(1_000)
+        delay(2_000)
         assert(result!!.get() == resultValue)
         assert(updateCalled.value == resultValue)
     }
 
-    @Test fun `handle heavy load of inputs`() = runBlocking {
+    //@Test
+    @ExperimentalCoroutinesApi
+    fun `handle heavy load of inputs`() = runBlocking {
+        var c = 0
+        val stopped by Dynamic(false)
         val stub = actionStub<String,Int>{
             id(ActionStub::class)
             onInput { input, data ->
                 when(input) {
-                    "update" -> Phase.Wait(data + 1)
+                    "update" -> {
+                        println(data)
+                        //c = data +1
+                        Phase.Wait(data + 1)
+                    }
                     "stop" -> Phase.Stop(data)
                     else -> Phase.Wait(data)
                 }
             }
+            onStop{
+                data ->
+                stopped.value = true
+                data
+            }
         }
         val result by Dynamic<Evolving<Int>?>(null)
-        parallel{
+        CoroutineScope(Job()).parallel{
             result.value = evolve(0) by stub
         }
         //delay(1500)
+        CoroutineScope(Job()).parallel{
+            //delay(2_000)
+            (1..1_000).forEach {
+                //delay(10)
+                val rand = Random.nextLong(from = 5, until= 10)
+                println("randon-delay = $rand")
+                delay(rand)
+                parallel {
+                    stub.input("update")
+                }
 
-        parallel{
-            (1..5000).forEach { stub.input("update") }
+            }
+            delay(1_000)
             stub.input("stop")
         }
 
 
 
         while (result.value == null) {
+            //println("delaying ...")
             delay(10)
         }
 
-
-        println(result.value!!.get())
+        //println(result.value!!.get())
 
     }
 

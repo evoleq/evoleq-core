@@ -16,10 +16,9 @@
 package org.drx.evoleq.evolution.stubs
 
 import kotlinx.coroutines.CoroutineScope
-import org.drx.dynamics.DynamicArrayList
-import org.drx.dynamics.and
-import org.drx.dynamics.exec.blockUntil
-import org.drx.dynamics.not
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.flows.process.SimpleProcessFlow
 import org.drx.evoleq.evolving.Evolving
@@ -27,9 +26,52 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 
-abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Data>)->Unit = {}) : UpdateStub<Data>(updateParent) {
+actual abstract class ActionStub<I, Data> actual constructor(
+    private val updateParent: suspend (Update<Data>)->Unit
+) : UpdateStub<Data>(updateParent) {
 
     private class StopException: Exception()
+
+    @ExperimentalCoroutinesApi
+    val inputBroadcastChannel  = BroadcastChannel<I>(10_000)
+    @ExperimentalCoroutinesApi
+    val inputReceiver = inputBroadcastChannel.openSubscription()
+
+    @ExperimentalCoroutinesApi
+    override val flow by lazy{ by(
+        SimpleProcessFlow(
+            onStart,
+            {data ->
+                while(updateReceiver.isEmpty && inputReceiver.isEmpty) {
+                    delay(1)
+                }
+                if (!updateReceiver.isEmpty) {
+                    val update = by(updateReceiver.receive())
+                    //with(by(updateReceiver.receive())) update@{
+                        try {
+                            //val updated = this@update(data)
+                            val updated = update(data)
+                            //console.log("data = $data")
+                            //console.log("updated = $updated")
+                            if (updated.data != data) {
+                                org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(onUpdate(updated))
+                            } else {
+                                org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(data)
+                            }
+                        } catch (exception: StopException) {
+                            org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Stop(data)
+                        }
+                    //}
+                } else if (!inputReceiver.isEmpty) {
+                    onInput(inputReceiver.receive(), data)
+                } else {
+                    Phase.Wait(data)
+                }
+            },
+            onStop
+        )
+    )}
+
 
     //private val updateStack by DynamicArrayList<Update<Data>>(arrayListOf())
     /*
@@ -38,10 +80,15 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
             updateStack.add(update)
         }
     }
+*/
 
-     */
 
-    private val inputStack: DynamicArrayList<I> = DynamicArrayList<I>(arrayListOf())
+//    private val inputStack: DynamicArrayList<I> = DynamicArrayList<I>(arrayListOf())
+
+
+
+
+
     /*
     private val inputActor = CoroutineScope(Job()).actor<I>(capacity = 10_000) {
         for(input in channel) {
@@ -50,7 +97,7 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
     }
 
      */
-
+/*
     private val updateStackIsEmpty = updateStack.isEmpty
     private val inputStackIsEmpty = inputStack.isEmpty
     private val stacksAreNonEmpty = !(updateStackIsEmpty and inputStackIsEmpty)
@@ -85,16 +132,20 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
             onStop
         )
     )}
+*/
 
+    @ExperimentalCoroutinesApi
     override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
             data -> flow(Phase.Start(data)) map { it.data }
     }
 
     abstract val onInput: suspend CoroutineScope.(I,Data)->Phase<Data>
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
-    suspend fun input(input: I) {
-        inputStack.add(input)
+    actual suspend fun input(input: I) {
+        inputBroadcastChannel.send(input)
+        //inputStack.add(input)
         //inputActor.send(input)
     }
 

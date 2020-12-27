@@ -15,10 +15,9 @@
  */
 package org.drx.evoleq.dsl
 
-import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.drx.dynamics.Dynamic
 import org.drx.dynamics.ID
@@ -31,20 +30,31 @@ import org.drx.evoleq.evolution.stubs.Updated
 import org.drx.evoleq.evolution.stubs.data
 import org.drx.evoleq.evolving.Evolving
 import org.evoleq.math.cat.suspend.morphism.by
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
+external fun setTimeout(function: () -> Unit, delay: Long)
 
-    private class UpdateStubConfigurationException(override val message: String?) : Exception(message)
+suspend fun delay(ms: Long): Unit = suspendCoroutine { continuation ->
+    setTimeout({
+        println("timeout")
+        continuation.resume(Unit)
+    }, ms)
+}
 
-    var updateParent: suspend (Update<Data>)->Unit = {}
+actual open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
-    var onUpdate: suspend CoroutineScope.(Updated<Data>) -> Data = {updated -> updated.data}
+    actual class UpdateStubConfigurationException actual constructor(override val message: String?) : Exception(message)
 
-    var onStart: suspend CoroutineScope.(Data)->Data = { data -> data }
+    actual var updateParent: suspend (Update<Data>)->Unit = {}
 
-    var onStop: suspend CoroutineScope.(Data)->Data = { data -> data }
+    actual var onUpdate: suspend CoroutineScope.(Updated<Data>) -> Data = { updated -> updated.data}
 
-    internal val stub by Dynamic<UpdateStub<Data>?>(null)
+    actual var onStart: suspend CoroutineScope.(Data)->Data = { data -> data }
+
+    actual var onStop: suspend CoroutineScope.(Data)->Data = { data -> data }
+
+    internal actual val stub by Dynamic<UpdateStub<Data>?>(null)
 
     private lateinit var stubIsNotNullInner: Dynamic<Boolean>
     internal val stubIsNotNull by lazy {
@@ -52,7 +62,7 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
             stubIsNotNullInner = stub.isNotNull()
         }
         while(!::stubIsNotNullInner.isInitialized) {
-            window.setTimeout({},1)
+            setTimeout({},1)
         }
         stubIsNotNullInner
     }
@@ -64,12 +74,12 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
             parentIsNotNullInner = stub.push(ParentIsNotNull::class){ it?.parent != null }
         }
         while(!::parentIsNotNullInner.isInitialized) {
-            window.setTimeout({},1)
+            setTimeout({}, 1)
         }
         parentIsNotNullInner
     }
 
-    override fun configure(): UpdateStub<Data> = with(object : UpdateStub<Data>(updateParent){
+    actual override fun configure(): UpdateStub<Data> = with(object : UpdateStub<Data>(updateParent){
         override val id: ID
             get() = this@UpdateStubConfiguration.id
 
@@ -95,29 +105,30 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
     }
 
     @EvoleqDsl
-    override fun StubConfiguration<Data>.evolve(arrow: suspend CoroutineScope.(Data) -> Evolving<Data>) {
+    actual override fun StubConfiguration<Data>.evolve(arrow: suspend CoroutineScope.(Data) -> Evolving<Data>) {
         throw UpdateStubConfigurationException("evolve function is already defined")
     }
 
     @EvoleqDsl
-    fun UpdateStubConfiguration<Data>.onStart(onStart: suspend CoroutineScope.(Data)->Data){
+    actual fun UpdateStubConfiguration<Data>.onStart(onStart: suspend CoroutineScope.(Data)->Data){
         this@UpdateStubConfiguration.onStart = onStart
     }
 
     @EvoleqDsl
-    fun UpdateStubConfiguration<Data>.onStop(onStop: suspend CoroutineScope.(Data)->Data){
+    actual fun UpdateStubConfiguration<Data>.onStop(onStop: suspend CoroutineScope.(Data)->Data){
         this@UpdateStubConfiguration.onStop = onStop
     }
 
 
 
     @EvoleqDsl
-    fun UpdateStubConfiguration<Data>.onUpdate(update: suspend CoroutineScope.(Updated<Data>) -> Data) {
+    actual fun UpdateStubConfiguration<Data>.onUpdate(update: suspend CoroutineScope.(Updated<Data>) -> Data) {
         this@UpdateStubConfiguration.onUpdate = update
     }
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
-    fun <P> UpdateStubConfiguration<Data>.updateParentBy(setter:suspend  (suspend CoroutineScope.(Data) -> Data)->(suspend CoroutineScope.(P)->P)) {
+    actual fun <P> UpdateStubConfiguration<Data>.updateParentBy(setter:suspend  (suspend CoroutineScope.(Data) -> Data)->(suspend CoroutineScope.(P)->P)) {
 
             this@UpdateStubConfiguration.updateParent = {
                 update: Update<Data> -> parentalUpdateStub<P>().update(id, setter(by(update.data())))
@@ -125,25 +136,26 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
     }
 
     @EvoleqDsl
-    suspend fun <P> UpdateStubConfiguration<Data>.updateParent(update: suspend CoroutineScope.(Data)->Data) {
+    actual suspend fun <P> UpdateStubConfiguration<Data>.updateParent(update: suspend CoroutineScope.(Data)->Data) {
             stub().updateParent<P>(update)
     }
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
-    suspend fun <E> UpdateStubConfiguration<Data>.updateChild(childId: ID,  update: suspend CoroutineScope.(E)->E) {
+    actual suspend fun <E> UpdateStubConfiguration<Data>.updateChild(childId: ID,  update: suspend CoroutineScope.(E)->E) {
             stub().updateChild(childId,update)
     }
 
 
     @EvoleqDsl
-    fun <E> UpdateStubConfiguration<Data>.updatableChild(id: ID, configuration: UpdateStubConfiguration<E>.() -> Unit) {
+    actual fun <E> UpdateStubConfiguration<Data>.updatableChild(id: ID, configuration: UpdateStubConfiguration<E>.() -> Unit) {
         childConfigurations[id] = Pair(UpdateStubConfiguration<E>(),configuration as StubConfiguration<*>.()->Unit)
     }
     @EvoleqDsl
-    open fun <E> UpdateStubConfiguration<Data>.updatableChild(stub: UpdateStub<E>) { updatableChild(stub.id, stub.configuration().second) }
+    actual open fun <E> UpdateStubConfiguration<Data>.updatableChild(stub: UpdateStub<E>) { updatableChild(stub.id, stub.configuration().second) }
 
 
-    suspend fun UpdateStubConfiguration<Data>.stub(): UpdateStub<Data> {
+    actual suspend fun UpdateStubConfiguration<Data>.stub(): UpdateStub<Data> {
         blockUntil(stubIsNotNull){
             it
         }
@@ -151,7 +163,7 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
     }
 
     @Suppress("unchecked_cast")
-    private suspend fun <P> parentalUpdateStub():  UpdateStub<P> {
+    actual suspend fun <P> parentalUpdateStub():  UpdateStub<P> {
         blockUntil(parentIsNotNull){it}
         return with(parent!!){
             require(this is UpdateStub)
@@ -161,21 +173,20 @@ open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 }
 
 @EvoleqDsl
-fun <Data> updateStub(configuration: UpdateStubConfiguration<Data>.()->Unit): UpdateStub<Data> = with(UpdateStubConfiguration<Data>()) {
+actual fun <Data> updateStub(configuration: UpdateStubConfiguration<Data>.()->Unit): UpdateStub<Data> = with(UpdateStubConfiguration<Data>()) {
     configuration()
     configure()
 }//configure(configuration) as UpdateStub<Data>
 
 @EvoleqDsl
-fun <E> StubConfiguration<*>.updatableChild(childId: ID,configuration: UpdateStubConfiguration<E>.()->Unit) {
+actual fun <E> StubConfiguration<*>.updatableChild(childId: ID, configuration: UpdateStubConfiguration<E>.()->Unit) {
     childConfigurations[childId] = Pair(UpdateStubConfiguration<E>(),configuration as StubConfiguration<*>.() -> Unit)
 }
 
-@EvoleqDsl
-fun <E> StubConfiguration<*>.updatableChild(stub: UpdateStub<E>) { updatableChild(stub.id, stub.configuration().second) }
+
 
 @EvoleqDsl
-fun <Data> UpdateStub<Data>.configuration(): Pair<out StubConfiguration<*>,UpdateStubConfiguration<Data>.()->Unit> =
+actual fun <Data> UpdateStub<Data>.configuration(): Pair<out StubConfiguration<*>,UpdateStubConfiguration<Data>.()->Unit> =
     Pair<StubConfiguration<*>,UpdateStubConfiguration<Data>.()->Unit>(UpdateStubConfiguration<Data>()){
         id(this@configuration.id)
         onStart(this@configuration.onStart)

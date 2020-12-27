@@ -16,12 +16,9 @@
 package org.drx.evoleq.evolution.stubs
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.actor
-import org.drx.dynamics.DynamicArrayList
-import org.drx.dynamics.and
-import org.drx.dynamics.exec.blockUntil
-import org.drx.dynamics.not
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.delay
 import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.flows.process.SimpleProcessFlow
 import org.drx.evoleq.evolving.Evolving
@@ -29,52 +26,40 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 
-abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Data>)->Unit = {}) : UpdateStub<Data>(updateParent) {
+actual abstract class ActionStub<I, Data> actual constructor(
+    private val updateParent: suspend (Update<Data>)->Unit
+) : UpdateStub<Data>(updateParent) {
 
     private class StopException: Exception()
 
-    private val updateStack by DynamicArrayList<Update<Data>>(arrayListOf())
-    private val updateActor = CoroutineScope(Job()).actor<Update<Data>>(capacity = 10_000) {
-        for(update in channel) {
-            updateStack.add(update)
-        }
-    }
+    @ExperimentalCoroutinesApi
+    val inputBroadcastChannel  = BroadcastChannel<I>(10_000)
+    @ExperimentalCoroutinesApi
+    val inputReceiver = inputBroadcastChannel.openSubscription()
 
-    private val inputStack: DynamicArrayList<I> = DynamicArrayList<I>(arrayListOf())
-    private val inputActor = CoroutineScope(Job()).actor<I>(capacity = 10_000) {
-        for(input in channel) {
-            inputStack.add(input)
-        }
-    }
-
-    private val updateStackIsEmpty = updateStack.isEmpty
-    private val inputStackIsEmpty = inputStack.isEmpty
-    private val stacksAreNonEmpty = !(updateStackIsEmpty and inputStackIsEmpty)
-
-    private val flow by lazy{ by(
+    @ExperimentalCoroutinesApi
+    override val flow by lazy{ by(
         SimpleProcessFlow(
             onStart,
             {data ->
-                blockUntil(stacksAreNonEmpty){it}
-                try {
-                    if (!(updateStackIsEmpty.value)) {
-                        with(by(updateStack.pop())) {
-                            try {
-                                if (this(data).data != data) {
-                                    Phase.Wait(onUpdate(this(data)))
-                                } else {
-                                    Phase.Wait(data)
-                                }
-                            } catch (exception: StopException) {
-                                Phase.Stop(data)
+                while(updateReceiver.isEmpty && inputReceiver.isEmpty) {
+                    delay(1)
+                }
+                if (!updateReceiver.isEmpty) {
+                    with(by(updateReceiver.receive())) {
+                        try {
+                            if (this(data).data != data) {
+                                Phase.Wait(onUpdate(this(data)))
+                            } else {
+                                Phase.Wait(data)
                             }
+                        } catch (exception: StopException) {
+                            Phase.Stop(data)
                         }
-                    } else if(!inputStackIsEmpty.value){
-                        onInput(inputStack.pop(), data)
-                    } else {
-                        Phase.Wait(data)
                     }
-                } catch(exception: NoSuchElementException) {
+                } else if (!inputReceiver.isEmpty) {
+                    onInput(inputReceiver.receive(), data)
+                } else {
                     Phase.Wait(data)
                 }
             },
@@ -82,20 +67,24 @@ abstract class ActionStub<I, Data>(private val updateParent: suspend (Update<Dat
         )
     )}
 
+    @ExperimentalCoroutinesApi
     override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
             data -> flow(Phase.Start(data)) map { it.data }
     }
 
     abstract val onInput: suspend CoroutineScope.(I,Data)->Phase<Data>
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
-    suspend fun input(input: I) {
-        inputActor.send(input)
+    actual suspend fun input(input: I) {
+        inputBroadcastChannel.send(input)
     }
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
     override  fun closePorts() {
-        updateActor.close()
-        inputActor.close()
+        updateBroadcastChannel.close()
+        inputBroadcastChannel.close()
     }
 }
+

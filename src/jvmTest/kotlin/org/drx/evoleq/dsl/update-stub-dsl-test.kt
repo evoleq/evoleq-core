@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.dsl
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.dynamics.Dynamic
@@ -25,8 +26,9 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.evoleq.math.cat.suspend.morphism.evolve
 import org.junit.Test
 
-class UpdateStubDslTest {
+class UpdateStubDslTestJvm {
 
+    @ExperimentalCoroutinesApi
     @Test fun `check basic functionality`() = runBlocking{
         class Id
         class Outer
@@ -64,6 +66,7 @@ class UpdateStubDslTest {
         assert(stopped.value)
     }
 
+    @ExperimentalCoroutinesApi
     @Test fun `update child stub`() = runBlocking {//with(DefaultEvolutionScope()) {
         class Parent
         class Child
@@ -127,6 +130,7 @@ class UpdateStubDslTest {
         //}
     }
 
+    @ExperimentalCoroutinesApi
     @Test fun `update parent from child stub`() = runBlocking {
         // Ids
         class Outer

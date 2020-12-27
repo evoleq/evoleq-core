@@ -16,8 +16,8 @@
 package org.drx.evoleq.evolution.stubs
 
 import kotlinx.coroutines.CoroutineScope
-import org.drx.dynamics.DynamicArrayList
-import org.drx.dynamics.onNext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BroadcastChannel
 import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.Stub
 import org.drx.evoleq.evolution.flows.process.SimpleProcessFlow
@@ -26,17 +26,50 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 
-abstract class InputStub<I,Data> : Stub<Data> {
-    private val inputStack: DynamicArrayList<I> = DynamicArrayList<I>(arrayListOf())
-    /*
-    private val inputActor = CoroutineScope(Job()).actor<I>(capacity = 10_000) {
-        for(input in channel) {
-            inputStack.add(input)
-        }
+actual abstract class InputStub<I,Data> : Stub<Data> {
+    
+    
+    @ExperimentalCoroutinesApi
+    val inputBroadcastChannel  = BroadcastChannel<I>(10_000)
+    
+    @ExperimentalCoroutinesApi
+    val inputReceiver = inputBroadcastChannel.openSubscription()
+    
+    @ExperimentalCoroutinesApi
+    private val flow by lazy{ by(SimpleProcessFlow(
+        onStart,
+        {data ->  onInput(inputReceiver.receive(),data)},
+        onStop
+    ))}
+    
+    actual abstract val onStart: suspend CoroutineScope.(Data)->Data
+    
+    actual abstract val onInput: suspend CoroutineScope.(I,Data)->Phase<Data>
+    
+    private val onStopBase: suspend CoroutineScope.(Data)->Data = { data ->
+        onStop(data)
     }
-
-
-     */
+    actual abstract val onStop: suspend CoroutineScope.(Data)->Data
+    
+    @ExperimentalCoroutinesApi
+    @EvoleqDsl
+    actual suspend fun input(input: I) {
+        inputBroadcastChannel.send(input)
+    }
+    
+    @ExperimentalCoroutinesApi
+    @EvoleqDsl
+    actual open fun closePorts() {
+        inputBroadcastChannel.close()
+    }
+    @ExperimentalCoroutinesApi
+    override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
+            data -> flow(Phase.Start(data)) map { it.data }
+    }
+    
+    /*
+    private val inputStack: DynamicArrayList<I> = DynamicArrayList<I>(arrayListOf())
+    
     private val flow by lazy{ by(SimpleProcessFlow(
         onStart,
         {data -> inputStack.onNext {
@@ -68,4 +101,5 @@ abstract class InputStub<I,Data> : Stub<Data> {
     override val morphism: suspend CoroutineScope.(Data) -> Evolving<Data> = {
         data -> flow(Phase.Start(data)) map { it.data }
     }
+    */
 }

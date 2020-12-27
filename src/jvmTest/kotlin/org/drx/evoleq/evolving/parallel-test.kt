@@ -22,7 +22,7 @@ import org.drx.dynamics.Dynamic
 import org.junit.Test
 import kotlin.system.measureTimeMillis
 
-class ParallelTest {
+class ParallelTestJvm {
 
     @Test fun `execution should start on initialization of Parallel`() = runBlocking {
         val parallel by Parallel{delay(1_000)}

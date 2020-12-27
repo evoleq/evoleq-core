@@ -15,6 +15,7 @@
  */
 package org.drx.evoleq.dsl
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.drx.dynamics.Dynamic
@@ -27,6 +28,7 @@ import org.junit.Test
 
 class InputStubDslTest {
 
+    @ExperimentalCoroutinesApi
     @Test fun `check basic functionality` () = runBlocking {
         data class Data(val state: String)
         val state by Dynamic(Data(""))
@@ -62,6 +64,7 @@ class InputStubDslTest {
         inputStub.input("state_2")
         delay(100)
         assert(onStartCalled)
+        delay(100)
         assert(onStopCalled)
     }
 

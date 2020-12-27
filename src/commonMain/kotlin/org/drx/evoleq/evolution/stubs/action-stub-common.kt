@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drx.evoleq.dsl
+package org.drx.evoleq.evolution.stubs
 
-@DslMarker annotation class EvoleqDsl
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.drx.evoleq.dsl.EvoleqDsl
 
-@DslMarker annotation class DebugDsl
-//@DslMarker annotation class EvolvingDsl
 
-@DslMarker annotation class FlowDsl
-
+expect abstract class ActionStub<I, Data>(
+    updateParent: suspend (Update<Data>)->Unit = {}
+) : UpdateStub<Data> {
+    @ExperimentalCoroutinesApi
+    @EvoleqDsl
+    suspend fun input(input: I)
+    
+}

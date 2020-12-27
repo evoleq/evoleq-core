@@ -23,7 +23,7 @@ import org.drx.evoleq.evolving.KlParallel
 import org.drx.evoleq.evolving.parallel
 import org.junit.Test
 
-class FlowTest {
+class FlowTestJvm {
     @Test fun `basic functionality should work`()  = runBlocking {
         val result by Flow<Int,Boolean>(
             conditions{

@@ -16,7 +16,6 @@
 package org.drx.evoleq.dsl
 
 import kotlinx.coroutines.CoroutineScope
-import org.drx.dynamics.Dynamic
 import org.drx.dynamics.ID
 import org.drx.evoleq.evolution.Stub
 import org.drx.evoleq.evolution.stubs.ActionStub
@@ -25,11 +24,11 @@ import org.drx.evoleq.evolving.Evolving
 import org.drx.evoleq.evolving.Parallel
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
-open class ActionStubConfiguration<I, Data> : UpdateStubConfiguration<Data>() {
+actual open class ActionStubConfiguration<I, Data> : UpdateStubConfiguration<Data>() {
 
-    private class ActionStubConfigurationException(override val message: String?) : Exception(message)
+    actual class ActionStubConfigurationException actual constructor(override val message: String?) : Exception(message)
 
-    private lateinit var onInput: suspend CoroutineScope.(I, Data) -> Phase<Data>
+    actual var onInput: suspend CoroutineScope.(I, Data) -> Phase<Data> = {_,data -> Phase.Stop(data)}
 
     //private val stub by Dynamic<ActionStub<I, Data>?>(null)
 
@@ -39,7 +38,7 @@ open class ActionStubConfiguration<I, Data> : UpdateStubConfiguration<Data>() {
 
     //private val parentIsNotNull by stub.push(ParentIsNotNull::class) { it?.parent != null }
 
-    override fun configure(): ActionStub<I, Data> = with(object : ActionStub<I, Data>(updateParent) {
+    actual override fun configure(): ActionStub<I, Data> = with(object : ActionStub<I, Data>(updateParent) {
         override val id: ID
             get() = this@ActionStubConfiguration.id
 
@@ -68,31 +67,31 @@ open class ActionStubConfiguration<I, Data> : UpdateStubConfiguration<Data>() {
     }
 
     @EvoleqDsl
-    override fun StubConfiguration<Data>.evolve(arrow: suspend CoroutineScope.(Data) -> Evolving<Data>) {
+    actual override fun StubConfiguration<Data>.evolve(arrow: suspend CoroutineScope.(Data) -> Evolving<Data>) {
         throw ActionStubConfigurationException("evolve function is already defined")
     }
 
     @EvoleqDsl
-    fun ActionStubConfiguration<I, Data>.onInput(input: suspend CoroutineScope.(I, Data)-> Phase<Data>) {
+    actual fun ActionStubConfiguration<I, Data>.onInput(input: suspend CoroutineScope.(I, Data)-> Phase<Data>) {
         this@ActionStubConfiguration.onInput= input
     }
 
     @EvoleqDsl
-    suspend fun ActionStubConfiguration<I,Data>.selfUpdate(data: Data, update: suspend CoroutineScope.(Data)->Data): Data =
+    actual suspend fun ActionStubConfiguration<I,Data>.selfUpdate(data: Data, update: suspend CoroutineScope.(Data)->Data): Data =
         Parallel{ onUpdate(Updated(this@ActionStubConfiguration.id, update(data))) }.get()
 
 
     @EvoleqDsl
-    fun <J, E> ActionStubConfiguration<I, Data>.actionChild(id: ID, configuration: ActionStubConfiguration<J, E>.() -> Unit) {
+    actual fun <J, E> ActionStubConfiguration<I, Data>.actionChild(id: ID, configuration: ActionStubConfiguration<J, E>.() -> Unit) {
         this@ActionStubConfiguration.childConfigurations[id] = Pair(ActionStubConfiguration<J, E>(),configuration as StubConfiguration<*>.()->Unit)
     }
     @EvoleqDsl
-    open fun <J, E> ActionStubConfiguration<I, Data>.actionChild(stub: ActionStub<J, E>) { this@ActionStubConfiguration.actionChild(stub.id, stub.configuration().second) }
+    actual open fun <J, E> ActionStubConfiguration<I, Data>.actionChild(stub: ActionStub<J, E>) { this@ActionStubConfiguration.actionChild(stub.id, stub.configuration().second) }
 
 
 }
 @EvoleqDsl
-fun <I, Data> actionStub(configuration: ActionStubConfiguration<I, Data>.()->Unit): ActionStub<I, Data> = with(ActionStubConfiguration<I, Data>()) {
+actual fun <I, Data> actionStub(configuration: ActionStubConfiguration<I, Data>.()->Unit): ActionStub<I, Data> = with(ActionStubConfiguration<I, Data>()) {
     configuration()
     configure()
 }
@@ -103,15 +102,15 @@ fun <I, Data> actionStub(configuration: ActionStubConfiguration<I, Data>.()->Uni
     //configure(configuration) as ActionStub<I, Data>
 
 @EvoleqDsl
-fun <J, E> StubConfiguration<*>.actionChild(childId: ID,configuration: ActionStubConfiguration<J, E>.()->Unit) {
+actual fun <J, E> StubConfiguration<*>.actionChild(childId: ID,configuration: ActionStubConfiguration<J, E>.()->Unit) {
     childConfigurations[childId] = Pair(ActionStubConfiguration<J, E>(),configuration as StubConfiguration<*>.() -> Unit)
 }
 
 @EvoleqDsl
-fun <J, E> StubConfiguration<*>.actionChild(stub: ActionStub<J, E>) { actionChild(stub.id, stub.configuration().second) }
+actual fun <J, E> StubConfiguration<*>.actionChild(stub: ActionStub<J, E>) { actionChild(stub.id, stub.configuration().second) }
 
 @EvoleqDsl
-fun <I, Data> ActionStub<I, Data>.configuration(): Pair<out StubConfiguration<*>,ActionStubConfiguration<I, Data>.()->Unit> =
+actual fun <I, Data> ActionStub<I, Data>.configuration(): Pair<out StubConfiguration<*>,ActionStubConfiguration<I, Data>.()->Unit> =
     Pair<StubConfiguration<*>,ActionStubConfiguration<I, Data>.()->Unit>(ActionStubConfiguration<I, Data>()){
         id(this@configuration.id)
         onStart(this@configuration.onStart)
