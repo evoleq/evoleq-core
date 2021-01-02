@@ -35,7 +35,6 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
             }
         } }
     }
-
     @EvoleqDsl
     override suspend fun get(): Data {
         blockUntil(maybe){ value -> value is Maybe.Just }
@@ -50,8 +49,8 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
         f: suspend CoroutineScope.(Data)->T
     ): Parallel<T>  = with(CoroutineScope(SupervisorJob())) scope@{
         this+scope.coroutineContext
-        parallel { f(get())
-            /*
+        parallel { //f(get())
+            
             with(onset { s -> async{ this@scope.f(s) } }) maybe@{
                 blockUntil(this){ maybe -> maybe is Maybe.Just }
                 if(this@scope.coroutineContext[Job]!!.isCancelled){
@@ -62,8 +61,6 @@ open class Parallel<out Data>(override  val scope: CoroutineScope = DefaultEvolv
                     deferred.value.await()
                 }
             }
-            
-             */
         }
     }
 

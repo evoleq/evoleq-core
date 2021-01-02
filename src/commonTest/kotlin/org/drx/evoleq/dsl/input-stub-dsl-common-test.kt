@@ -25,6 +25,7 @@ import org.drx.evoleq.evolving.parallel
 import org.evoleq.math.cat.suspend.morphism.by
 import org.evoleq.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class InputStubDslCommonTest {
@@ -94,9 +95,9 @@ class InputStubDslCommonTest {
         val c1 = parent[Child1::class]!!
         val c2 = parent[Child2::class]!!
         assertTrue(c1 is InputStub<*,*>)
-        assertTrue(c1.parent == parent)
+        assertEquals(c1.parent, parent)
         assertTrue(c2 is InputStub<*,*>)
-        assertTrue(c2.parent == parent)
+        assertEquals(c2.parent, parent)
 
 
     }

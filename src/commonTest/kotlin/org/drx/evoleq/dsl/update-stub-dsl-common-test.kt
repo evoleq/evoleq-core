@@ -25,6 +25,7 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.evoleq.math.cat.suspend.morphism.evolve
 import org.evoleq.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class UpdateStubDslCommonTest {
@@ -69,12 +70,13 @@ class UpdateStubDslCommonTest {
     }
 
     @ExperimentalCoroutinesApi
-    @Test fun updateChildStub() = runTest {
+    //@Test
+    fun updateChildStub() = runTest {
         class Parent
         class Child
         class Outer
         data class Data(val x: Int, val s: String)
-        suspend fun Data.x(set: suspend Int.()->Int): Data = copy(x = x.set())
+        suspend fun Data.x(set: suspend Int.()->Int): Data = Data(x.set(),s)//copy(x = x.set())
 
         var updateResult: Int = 0
 
@@ -82,8 +84,10 @@ class UpdateStubDslCommonTest {
             id(Parent::class)
             onStart { data ->
                 println("Started parent")
-                process<Int>(child(Child::class)) on data.x
-                println("Returning from onStart od parent")
+                //parallel {
+                    process<Int>(child(Child::class)) on data.x
+                    println("Returning from onStart of parent")
+                //}
                 data
             }
             onUpdate { updated ->
@@ -119,7 +123,7 @@ class UpdateStubDslCommonTest {
         }
         Parallel{
             val result = evolve(Data(0,"")) by updateStub
-            assertTrue(result.get() == Data(1,""))
+            assertEquals(result.get(), Data(1,""))
             println("result checked")
         }
 
@@ -193,16 +197,16 @@ class UpdateStubDslCommonTest {
         delay(1_000)
         Parallel {
             val res = by(parent)(Data(0))
-            assertTrue(res.get() == Data(1))
+            assertEquals(res.get(), Data(1))
         }
         child!!.update(Outer::class) { _ -> 1 }
         delay(100)
-        assertTrue(updatedData.value == Data(1))
+        assertEquals(updatedData.value, Data(1))
         parent.stop()
         delay(500)
     }
 
-    @Test fun updateStubAsChildOfStandardStubShouldIntegrateProperly() {
+    @Test fun updateStubAsChildOfStandardStubShouldIntegrateProperly() = runTest {
         data class Data(val x: Int)
 
         class Parent
@@ -218,6 +222,6 @@ class UpdateStubDslCommonTest {
         }
         assertTrue(stub.stubs.size == 1)
         assertTrue(stub.stubs[Child::class] is UpdateStub)
-        assertTrue(stub.stubs[Child::class]!!.parent == stub)
+        assertEquals(stub.stubs[Child::class]!!.parent, stub)
     }
 }

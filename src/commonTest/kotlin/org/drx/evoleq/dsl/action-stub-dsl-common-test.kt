@@ -28,7 +28,7 @@ import org.evoleq.math.cat.suspend.morphism.by
 import org.evoleq.math.cat.suspend.morphism.evolve
 import kotlin.random.Random
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 import org.drx.evoleq.evolution.phase.process.SimpleProcessPhase as Phase
 
 class ActionStubDslTestCommon {
@@ -62,8 +62,8 @@ class ActionStubDslTestCommon {
         stub.input("update")
         stub.input("stop")
         delay(2_000)
-        assertTrue(result!!.get() == resultValue)
-        assertTrue(updateCalled.value == resultValue)
+        assertEquals(result!!.get(), resultValue)
+        assertEquals(updateCalled.value, resultValue)
     }
 
     //@Test
@@ -97,7 +97,7 @@ class ActionStubDslTestCommon {
         //delay(1500)
         CoroutineScope(Job()).parallel{
             //delay(2_000)
-            (1..1_000).forEach {
+            (1..1_000).forEach { _ ->
                 //delay(10)
                 val rand = Random.nextLong(from = 5, until= 10)
                 println("randon-delay = $rand")

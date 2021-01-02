@@ -18,6 +18,7 @@ package org.drx.evoleq.evolution.stubs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import org.drx.dynamics.ID
 import org.drx.evoleq.dsl.EvoleqDsl
 import org.drx.evoleq.evolution.Stub
@@ -40,11 +41,17 @@ actual abstract class UpdateStub<Data> actual constructor(private val updatePare
     internal open val flow by lazy{ by(
         SimpleProcessFlow(
             onStart,
-            {data -> with(updateReceiver.receive()){
-                with(morphism) {
+            {data -> with(updateReceiver.receive()) update@{
+                with(this.morphism) {
                     try {
-                        if (this(data).data != data) {
-                            org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(onUpdate(this(data)))
+                        val updated = this(data)
+                        
+                        if(updated is Nothing?) {
+                            //update(this@update)
+                            org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(data)
+                        }
+                        else if (updated.data != data) {
+                            org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(onUpdate(updated))
                         } else {
                             org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(data)
                         }
@@ -122,8 +129,9 @@ actual abstract class UpdateStub<Data> actual constructor(private val updatePare
         updateParent(Update(id, update))
     }
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
     actual open fun closePorts() {
-       //  updateActor.close()
+        updateBroadcastChannel.close()
     }
 }

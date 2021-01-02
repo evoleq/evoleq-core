@@ -61,9 +61,12 @@ actual open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
         GlobalScope.launch {
             stubIsNotNullInner = stub.isNotNull()
         }
+        /*
         while(!::stubIsNotNullInner.isInitialized) {
             setTimeout({},1)
         }
+        
+         */
         stubIsNotNullInner
     }
 
@@ -73,9 +76,12 @@ actual open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
         GlobalScope.launch {
             parentIsNotNullInner = stub.push(ParentIsNotNull::class){ it?.parent != null }
         }
+        /*
         while(!::parentIsNotNullInner.isInitialized) {
             setTimeout({}, 1)
         }
+        
+         */
         parentIsNotNullInner
     }
 
@@ -156,15 +162,23 @@ actual open class UpdateStubConfiguration<Data> : StubConfiguration<Data>() {
 
 
     actual suspend fun UpdateStubConfiguration<Data>.stub(): UpdateStub<Data> {
-        blockUntil(stubIsNotNull){
+        while(stub.value == null){
+            delay(1)
+        }
+        /*blockUntil(stub.isNotNull()){
             it
         }
+        
+         */
         return stub.value!!
     }
 
     @Suppress("unchecked_cast")
     actual suspend fun <P> parentalUpdateStub():  UpdateStub<P> {
-        blockUntil(parentIsNotNull){it}
+        //blockUntil(parentIsNotNull){it}
+        while(parent == null) {
+            delay(1)
+        }
         return with(parent!!){
             require(this is UpdateStub)
             this as UpdateStub<P>

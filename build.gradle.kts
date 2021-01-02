@@ -79,7 +79,7 @@ kotlin {
     }
     js{
         browser()
-        nodejs()
+        //nodejs()
     }
 
     sourceSets {

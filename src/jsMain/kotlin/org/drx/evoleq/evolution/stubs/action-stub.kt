@@ -53,7 +53,10 @@ actual abstract class ActionStub<I, Data> actual constructor(
                             val updated = update(data)
                             //console.log("data = $data")
                             //console.log("updated = $updated")
-                            if (updated.data != data) {
+                            if(update is Nothing?) {
+                                org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(data)
+                            }
+                            else if (updated.data != data) {
                                 org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(onUpdate(updated))
                             } else {
                                 org.drx.evoleq.evolution.phase.process.SimpleProcessPhase.Wait(data)
@@ -149,8 +152,11 @@ actual abstract class ActionStub<I, Data> actual constructor(
         //inputActor.send(input)
     }
 
+    @ExperimentalCoroutinesApi
     @EvoleqDsl
     override  fun closePorts() {
+        super.closePorts()
+        inputBroadcastChannel.close()
        // updateActor.close()
       //  inputActor.close()
     }
