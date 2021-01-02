@@ -23,31 +23,14 @@ kotlin {
     /* Targets configuration omitted.
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
-    /*
-    js{
-        
-        
-        browser{
-            testTask {
-                useKarma {
-                    useChromeHeadless()
-                }
-            }
-        }
-        binaries.executable()
-      
-        
-    }
     
-    
-     */
     jvm().compilations["main"].defaultSourceSet {
         dependencies {
             implementation(kotlin("stdlib-jdk8"))
             //implementation(kotlin("reflect"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Config.Versions.coroutines}")
-            implementation("org.evoleq:mathcat-core-jvm:1.0.1")
-            implementation("org.evoleq:mathcat-morphism-jvm:1.0.1")
+            implementation("org.evoleq:mathcat-core-jvm:${Config.Versions.mathcatMain}")
+            implementation("org.evoleq:mathcat-morphism-jvm:${Config.Versions.mathcatMain}")
         }
     }
     // JVM-specific tests and their dependencies:
@@ -55,16 +38,16 @@ kotlin {
         dependencies {
             implementation(kotlin("test-junit"))
             //implementation(kotlin("test"))
-            implementation("org.evoleq:mathcat-core-jvm:1.0.1")
-            implementation("org.evoleq:mathcat-morphism-jvm:1.0.1")
+            implementation("org.evoleq:mathcat-core-jvm:${Config.Versions.mathcatMain}")
+            implementation("org.evoleq:mathcat-morphism-jvm:${Config.Versions.mathcatMain}")
         }
     }
 
     js().compilations["main"].defaultSourceSet  {
         dependencies {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:${Config.Versions.coroutines}")
-            implementation("org.evoleq:mathcat-core-js:1.0.1")
-            implementation("org.evoleq:mathcat-morphism-js:1.0.1")
+            implementation("org.evoleq:mathcat-core-js:${Config.Versions.mathcatMain}")
+            implementation("org.evoleq:mathcat-morphism-js:${Config.Versions.mathcatMain}")
         }
     }
     js().compilations["test"].defaultSourceSet {
@@ -73,8 +56,8 @@ kotlin {
             //implementation("org.evoleq:configurations-js:2.0.0-alpha")
             implementation(kotlin("test-js"))
             implementation(kotlin("test-js-runner"))
-            implementation("org.evoleq:mathcat-core-js:1.0.1")
-            implementation("org.evoleq:mathcat-morphism-js:1.0.1")
+            implementation("org.evoleq:mathcat-core-js:${Config.Versions.mathcatMain}")
+            implementation("org.evoleq:mathcat-morphism-js:${Config.Versions.mathcatMain}")
         }
     }
     js{
@@ -89,8 +72,8 @@ kotlin {
                 implementation( project(":dynamics") )
                 implementation( project(":configurations") )
 
-                implementation("org.evoleq:mathcat-core:1.0.1")
-                implementation("org.evoleq:mathcat-morphism:1.0.1")
+                implementation("org.evoleq:mathcat-core:${Config.Versions.mathcatMain}")
+                implementation("org.evoleq:mathcat-morphism:${Config.Versions.mathcatMain}")
 
                 //implementation(kotlin("reflect"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Config.Versions.coroutines}")
@@ -101,8 +84,8 @@ kotlin {
                 implementation( project(":dynamics") )
                 implementation( project(":configurations") )
                 implementation( project(":mpp-test") )
-                implementation("org.evoleq:mathcat-core:1.0.1")
-                implementation("org.evoleq:mathcat-morphism:1.0.1")
+                implementation("org.evoleq:mathcat-core:${Config.Versions.mathcatMain}")
+                implementation("org.evoleq:mathcat-morphism:${Config.Versions.mathcatMain}")
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }

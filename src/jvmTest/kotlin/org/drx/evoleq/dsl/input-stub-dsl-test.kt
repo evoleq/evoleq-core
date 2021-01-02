@@ -64,7 +64,7 @@ class InputStubDslTest {
         inputStub.input("state_2")
         delay(100)
         assert(onStartCalled)
-        delay(100)
+        delay(500)
         assert(onStopCalled)
     }
 
